@@ -1,0 +1,13 @@
+version: "3"
+
+services:
+
+# PRODUCTION
+  ssh-server:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: pam-ssh-server:latest
+    restart: always
+    ports:
+      - "2222:22"

@@ -1,0 +1,36 @@
+FROM ubuntu:14.04.5
+
+RUN apt-get update -y && \
+    apt-get install -y openssh-server && \
+    apt-get install -y wget && \
+    apt-get install -y rsyslog && \
+    apt-get install -y make && \
+    apt-get install -y gcc && \
+    apt-get install -y libpam0g-dev
+
+WORKDIR /tmp
+
+RUN wget https://storage.googleapis.com/golang/go1.8.1.linux-amd64.tar.gz && \
+    tar -C /usr/local -xzf go1.8.1.linux-amd64.tar.gz && \
+    # echo PATH=$PATH:/usr/local/go/bin >> /etc/environment && \
+    ln -s /usr/local/go/bin/go /usr/sbin/go
+
+RUN /usr/sbin/rsyslogd && \
+    /usr/bin/ssh-keygen -A && \
+    mkdir /var/run/sshd
+
+COPY src/ /tmp/pam-src/
+
+WORKDIR /tmp/pam-src
+
+RUN make -f /tmp/pam-src/Makefile
+
+RUN cp pam_custom.so /lib/x86_64-linux-gnu/security/pam_custom.so
+RUN chmod 755 /lib/x86_64-linux-gnu/security/pam_custom.so
+
+RUN cp /etc/pam.d/sshd /etc/pam.d/sshd.BAK
+COPY pamd/sshd_ubuntu /etc/pam.d/sshd
+
+EXPOSE 22
+
+CMD ["/usr/sbin/sshd", "-D"]
