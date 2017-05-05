@@ -1,3 +1,6 @@
-auth [success=1 default=ignore] /lib/x86_64-linux-gnu/security/pam_custom.so
-auth requisite                  pam_deny.so
-auth required                   pam_permit.so
+auth            [success=1 default=ignore]        /lib/x86_64-linux-gnu/security/pam_custom.so
+auth            requisite                         pam_deny.so
+auth            required                          pam_permit.so
+account         required                          /lib/x86_64-linux-gnu/security/pam_custom.so
+password        required                          /lib/x86_64-linux-gnu/security/pam_custom.so
+session         required                          /lib/x86_64-linux-gnu/security/pam_custom.so

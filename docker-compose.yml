@@ -6,7 +6,7 @@ services:
   ssh-server:
     build:
       context: ./
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile_ubuntu
     image: pam-ssh-server:latest
     restart: always
     ports:

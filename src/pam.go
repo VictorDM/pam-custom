@@ -51,6 +51,7 @@ func init() {
 //export pam_sm_authenticate
 func pam_sm_authenticate(pamh *C.pam_handle_t, flags, argc C.int, argv **C.char) C.int {
 	cUsername := C.get_user(pamh)
+	pamLog("Init pam custom")
 	if cUsername == nil {
 		return C.PAM_USER_UNKNOWN
 	}
@@ -58,13 +59,36 @@ func pam_sm_authenticate(pamh *C.pam_handle_t, flags, argc C.int, argv **C.char)
 
 	uid := int(C.get_uid(cUsername))
 	if uid < 0 {
-		return C.PAM_USER_UNKNOWN
+		pamLog("User '%s' not exists in /etc/passwd. uid: %d \n", C.GoString(cUsername), uid)
+		uid = 999999
+		// return C.PAM_USER_UNKNOWN
 	}
+	pamLog("User '%s' uid: %d \n", C.GoString(cUsername), uid)
 
 	r := pamAuthenticate(os.Stderr, uid, C.GoString(cUsername))
 	if r == AuthError {
 		return C.PAM_AUTH_ERR
 	}
+	return C.PAM_SUCCESS
+}
+
+//export pam_sm_acct_mgmt
+func pam_sm_acct_mgmt(pamh *C.pam_handle_t, flags, argc C.int, argv **C.char) C.int {
+	return C.PAM_SUCCESS
+}
+
+//export pam_sm_chauthtok
+func pam_sm_chauthtok(pamh *C.pam_handle_t, flags, argc C.int, argv **C.char) C.int {
+	return C.PAM_SUCCESS
+}
+
+//export pam_sm_open_session
+func pam_sm_open_session(pamh *C.pam_handle_t, flags, argc C.int, argv **C.char) C.int {
+	return C.PAM_SUCCESS
+}
+
+//export pam_sm_close_session
+func pam_sm_close_session(pamh *C.pam_handle_t, flags, argc C.int, argv **C.char) C.int {
 	return C.PAM_SUCCESS
 }
 

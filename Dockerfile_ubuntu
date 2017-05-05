@@ -12,11 +12,11 @@ WORKDIR /tmp
 
 RUN wget https://storage.googleapis.com/golang/go1.8.1.linux-amd64.tar.gz && \
     tar -C /usr/local -xzf go1.8.1.linux-amd64.tar.gz && \
-    # echo PATH=$PATH:/usr/local/go/bin >> /etc/environment && \
-    ln -s /usr/local/go/bin/go /usr/sbin/go
+    ln -s /usr/local/go/bin/go /usr/sbin/go && \
+    sed -i 's|[#]*PasswordAuthentication no|PasswordAuthentication yes|g' /etc/ssh/sshd_config && \
+    sed -i 's|[#]*UsePrivilegeSeparation yes|UsePrivilegeSeparation no|g' /etc/ssh/sshd_config
 
-RUN /usr/sbin/rsyslogd && \
-    /usr/bin/ssh-keygen -A && \
+RUN /usr/bin/ssh-keygen -A && \
     mkdir /var/run/sshd
 
 COPY src/ /tmp/pam-src/
@@ -25,10 +25,10 @@ WORKDIR /tmp/pam-src
 
 RUN make -f /tmp/pam-src/Makefile
 
-RUN cp pam_custom.so /lib/x86_64-linux-gnu/security/pam_custom.so
-RUN chmod 755 /lib/x86_64-linux-gnu/security/pam_custom.so
+RUN cp pam_custom.so /lib/x86_64-linux-gnu/security/pam_custom.so && \
+    chmod 755 /lib/x86_64-linux-gnu/security/pam_custom.so && \
+    cp /etc/pam.d/sshd /etc/pam.d/sshd.BAK
 
-RUN cp /etc/pam.d/sshd /etc/pam.d/sshd.BAK
 COPY pamd/sshd_ubuntu /etc/pam.d/sshd
 
 EXPOSE 22
