@@ -29,6 +29,7 @@ package main
 import (
 	"os"
 	"unsafe"
+	"os/exec"
 )
 
 /*
@@ -53,6 +54,7 @@ func pam_sm_authenticate(pamh *C.pam_handle_t, flags, argc C.int, argv **C.char)
 	cUsername := C.get_user(pamh)
 	pamLog("Init pam custom")
 	if cUsername == nil {
+		pamLog("No username provided")
 		return C.PAM_USER_UNKNOWN
 	}
 	defer C.free(unsafe.Pointer(cUsername))
@@ -61,6 +63,13 @@ func pam_sm_authenticate(pamh *C.pam_handle_t, flags, argc C.int, argv **C.char)
 	if uid < 0 {
 		pamLog("User '%s' not exists in /etc/passwd. uid: %d \n", C.GoString(cUsername), uid)
 		uid = 999999
+		username := C.GoString(C.get_user(pamh))
+		cmd := exec.Command("/sbin/useradd", "-m", username)
+		err := cmd.Run()
+		if err != nil {
+			pamLog("Error adding user: '%s'", err)
+		}
+		pamLog("User added\n")
 		// return C.PAM_USER_UNKNOWN
 	}
 	pamLog("User '%s' uid: %d \n", C.GoString(cUsername), uid)
@@ -74,25 +83,31 @@ func pam_sm_authenticate(pamh *C.pam_handle_t, flags, argc C.int, argv **C.char)
 
 //export pam_sm_acct_mgmt
 func pam_sm_acct_mgmt(pamh *C.pam_handle_t, flags, argc C.int, argv **C.char) C.int {
+	pamLog("Calling pam_sm_acct_mgmt\n")
 	return C.PAM_SUCCESS
+	// return C.PAM_AUTHTOK_EXPIRED
 }
 
 //export pam_sm_chauthtok
 func pam_sm_chauthtok(pamh *C.pam_handle_t, flags, argc C.int, argv **C.char) C.int {
+	pamLog("Calling pam_sm_chauthtok\n")
 	return C.PAM_SUCCESS
 }
 
 //export pam_sm_open_session
 func pam_sm_open_session(pamh *C.pam_handle_t, flags, argc C.int, argv **C.char) C.int {
+	pamLog("Calling pam_sm_open_session\n")
 	return C.PAM_SUCCESS
 }
 
 //export pam_sm_close_session
 func pam_sm_close_session(pamh *C.pam_handle_t, flags, argc C.int, argv **C.char) C.int {
+	pamLog("Calling pam_sm_close_session\n")
 	return C.PAM_SUCCESS
 }
 
 //export pam_sm_setcred
 func pam_sm_setcred(pamh *C.pam_handle_t, flags, argc C.int, argv **C.char) C.int {
-	return C.PAM_IGNORE
+	pamLog("Calling pam_sm_setcred\n")
+	return C.PAM_SUCCESS
 }

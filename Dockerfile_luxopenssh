@@ -1,0 +1,33 @@
+FROM lux-openssh-server:7.3p1-4
+
+RUN yum update -y && \
+    yum install -y wget && \
+    yum install -y rsyslog && \
+    yum install -y make && \
+    yum install -y gcc && \
+    yum install -y pam-devel
+
+WORKDIR /tmp
+
+RUN wget https://storage.googleapis.com/golang/go1.8.1.linux-amd64.tar.gz && \
+    tar -C /usr/local -xzf go1.8.1.linux-amd64.tar.gz && \
+    ln -s /usr/local/go/bin/go /usr/sbin/go
+
+RUN /usr/bin/ssh-keygen -A
+
+COPY src/ /tmp/pam-src/
+
+WORKDIR /tmp/pam-src
+
+RUN make -f /tmp/pam-src/Makefile && \
+    cp pam_custom.so /lib64/security/pam_custom.so && \
+    chmod 755 /lib64/security/pam_custom.so&& \
+    cp /etc/pam.d/lux-sshd /etc/pam.d/lux-sshd.BAK
+
+COPY pamd/lux-sshd_centos /etc/pam.d/lux-sshd
+COPY conf/lux-sshd_config /etc/lux-ssh/sshd_config
+
+EXPOSE 22
+
+CMD ["tail", "-f", "/var/log/yum.log"]
+# CMD ["/usr/sbin/lux-sshd", "-D"]

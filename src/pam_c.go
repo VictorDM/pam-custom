@@ -120,6 +120,7 @@ import (
 
 // ownerUID returns the uid of the owner of a given file or directory.
 func ownerUID(path string) int {
+	pamLog("Calling ownerUID\n")
 	cPath := C.CString(path)
 	defer C.free(unsafe.Pointer(cPath))
 
@@ -128,6 +129,7 @@ func ownerUID(path string) int {
 
 // getUID is used for testing.
 func getUID() int {
+	pamLog("Calling getUID\n")
 	u, err := user.Current()
 	if err != nil {
 		fmt.Printf("user.Current error: %v\n", err)
@@ -146,6 +148,7 @@ func getUID() int {
 
 // getUsername returns the username associated with the given uid.
 func getUsername(uid int) string {
+	pamLog("Calling getUsername\n")
 	cUsername := C.get_username(C.int(uid))
 	if cUsername == nil {
 		return "<unknown>"

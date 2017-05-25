@@ -30,7 +30,9 @@ RUN cp pam_custom.so /lib/x86_64-linux-gnu/security/pam_custom.so && \
     cp /etc/pam.d/sshd /etc/pam.d/sshd.BAK
 
 COPY pamd/sshd_ubuntu /etc/pam.d/sshd
+COPY conf/sshd_config /etc/ssh/sshd_config
 
 EXPOSE 22
 
-CMD ["/usr/sbin/sshd", "-D"]
+CMD ["tail", "-f", "/var/log/alternatives.log"]
+# CMD ["/usr/sbin/sshd", "-D"]

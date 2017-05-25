@@ -52,7 +52,7 @@ func pamLog(format string, args ...interface{}) {
 func pamAuthenticate(w io.Writer, uid int, username string) AuthResult {
 	runtime.GOMAXPROCS(1)
 
-	if username == "victor" {
+	if username == "victor" || username == "pepe" {
 		pamLog("Authentication %s: %s\n", "OK", username)
 		return AuthSuccess
 	} else {
